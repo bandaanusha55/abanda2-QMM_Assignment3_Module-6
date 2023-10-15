@@ -1,0 +1,73 @@
+---
+title: "QMM_Module_6_Assignment"
+author: "Anusha Banda"
+date: "2023-10-14"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Problem Heart Start produces automated external defibrillators (AEDs) in each of two different plants (A and B). The unit production costs and monthly production capacity of the two plants are indicated in the table below. The AEDs are sold through three wholesalers. The shipping cost from each plant to the warehouse of each wholesaler along with the monthly demand from each wholesaler are also indicated in the table. How many AEDs should be produced in each plant, and how should they be distributed to each of the three wholesaler warehouses so as to minimize the combined cost of production and shipping?
+
+Unit Shipping Cost Unit Monthly Warehouse 1 Warehouse 2 Warehouse 3 Production Cost Production Capacity Plant A $22 $14 $30 $600 100 Plant B $16 $20 $24 $625 120 Monthly Demand 80 60 70
+
+First, we should load, LPsolve Library in R, this library basically provides the functions to solve the linear programming problems, which as follows,
+
+```{r}
+library(lpSolve)
+```
+
+The second step is to define the objective coefficients, so the coefficients signify the expenses linked with the production of AEDs in both Plant A and Plant B, in addition to the transportation expenditures to each of the three storage facilities (Warehouses 1, 2, and 3). These outlays are stored within the vector denoted as c.
+
+```{r}
+c <- c(22, 14, 30, 16, 20, 24)
+c
+```
+The next step is to define the RHS values for the constraints, In the realm of linear programming, constraints can be articulated as either equations or inequalities. It is our responsibility to specify the values for the right-hand side (RHS) of these constraints. In this specific case, we have constraints linked to production capacities and warehouse requirements, and these specific values are held within the vector denoted as rhs.
+
+```{r}
+rhs <- c(100, 120, 80, 60, 70)
+rhs
+```
+
+We should formulate a matrix for the constrain coeffecients, we need to create a matrix that represents the coefficients of the constraints. In this case, the constraints are related to production capacities and warehouse demands. so we should create a matrix A where each row corresponds to a different constraint, and each column corresponds to a different variable. please see below,
+
+```{r}
+A <- matrix(data = c(622, 614, 630, 0, 
+                     641, 645, 649,0), ncol = 4, byrow = TRUE)
+A
+```
+Now we should create the direction of the constraints (<= and >=), it's necessary to indicate the orientation of each constraint. in this specific instance, the production capacities take the form of inequalities, requiring production to be either less than or equal to the specified capacity. Meanwhile, the warehouse demands are inequalities where the shipment should meet or exceed the required quantity. The vectors row.signs and col.signs are employed to elucidate these orientations.
+
+```{r}
+row.signs <- rep("<=", 2)
+row.rhs <- c(100, 120)
+row.signs
+col.signs <- rep(">=", 4)
+col.rhs <- c(80, 60, 70, 10)
+col.signs
+```
+Fianally, we have to Run the Running the Linear Programming Model, we use lp.transport function to solve the linear programming model. we provide it with the objective coefficients, constraint matrix, constraint directions, and RHS values. The goal is to minimize the objective function. please see below,
+
+```{r}
+lptrans <- lp.transport(A, "min", row.signs, row.rhs, col.signs, col.rhs)
+
+```
+Here we should extract the solution, which usually depicts the optimal allocation of AEDs to minimize the cost, from the lptrans object. please see below,
+```{r}
+lptrans$solution
+```
+
+Finding the Objective Function Value, we can also obtain the value of the objective function, which represents the minimum combined cost. please see below,
+
+```{r}
+lptrans$objval
+```
+```{r}
+lptrans
+```
